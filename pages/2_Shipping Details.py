@@ -10,7 +10,10 @@ st.markdown("""<style>.medium-font {font-size:40px !important;text-align: center
     
 @st.cache(allow_output_mutation=True)
 def load_data(allow_output_mutation=True):
-    data = pd.read_csv('https://drive.google.com/file/d/1pYZAPKwUX9SZ3tdD4KH40bBymhccDxkS/view?usp=sharing', encoding='latin-1')
+    url='https://drive.google.com/file/d/1pYZAPKwUX9SZ3tdD4KH40bBymhccDxkS/view?usp=sharing'
+    file_id=url.split('/')[-2]
+    dwn_url='https://drive.google.com/uc?id=' + file_id
+    data = pd.read_csv(dwn_url, encoding='latin-1')
     return data
 
 df = load_data()
