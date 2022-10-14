@@ -3,9 +3,9 @@ import pandas as pd
 # import matplotlib.pyplot as plt
 import plotly.express as px
 # import plotly.graph_objs as go
-from googletrans import Translator
+# from googletrans import Translator
 
-translator = Translator()
+# translator = Translator()
 
 st.set_page_config(layout="wide")
 
