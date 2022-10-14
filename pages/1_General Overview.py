@@ -126,9 +126,10 @@ with container3:
 
     with col2:
         st.write("NANTI YAAA")
-        # fig2 = px.choropleth(countries, locations=countries['index'], color=countries['Negara order'], locationmode='country names')
-        # fig2.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-        # st.plotly_chart(fig2)  
+        countries = df_year['Negara order'].value_counts()
+        fig2 = px.choropleth(countries, locations=countries.index, color=countries.values, locationmode='country names')
+        fig2.update_layout(margin={"r":50,"t":50,"l":50,"b":50})
+        st.plotly_chart(fig2) 
 
 with container4:
     col1, col2, col3, col4 = st.columns([3.2, 1.5, 1, 1])
