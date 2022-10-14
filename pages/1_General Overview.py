@@ -23,6 +23,7 @@ def load_data(allow_output_mutation=True):
 
 df = load_data()
 
+st.write(df.columns)
 df['shipping date (DateOrders)'] = pd.to_datetime(df["shipping date (DateOrders)"])
 df[' tanggal order (DateOrders)'] = pd.to_datetime(df[" tanggal order (DateOrders)"])
 
