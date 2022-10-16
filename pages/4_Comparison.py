@@ -4,7 +4,7 @@ import plotly.express as px
 import datetime
 import plotly.graph_objects as go
 import calendar
-import numpy as np
+from plotly.subplots import make_subplots
 
 st.set_page_config(layout="wide")
 
@@ -80,7 +80,7 @@ with container1:
 container2 = st.container()
 
 with container2:
-    col1, col2, col3, col4 = st.columns([3.5, 1, 1, 1])
+    col1, col2, col3, col4 = st.columns([3.3, 1, 1, 1])
     if option == 'year':
         segmentation_details = '(monthly)'
         data1_sales_recap = df_data1[' tanggal order (DateOrders)'].groupby(df_data1[' tanggal order (DateOrders)'].dt.month).agg('count').reset_index(name='Count')
@@ -120,7 +120,7 @@ with container2:
         fig.add_trace(go.Scatter(x=data1_sales_recap[' tanggal order (DateOrders)'], y=data1_sales_recap['Count'], fill='tozeroy', name=data1_name))
         fig.add_trace(go.Scatter(x=data2_sales_recap[' tanggal order (DateOrders)'], y=data2_sales_recap['Count'], fill='tozeroy', name=data2_name))
         fig.update_layout(width=600, height=200, margin=dict(l=0, r=0, b=20, t=30))
-        fig.update_layout(title_text="Total sales "+segmentation_details, title_x=0.5, xaxis=dict(showgrid=False), yaxis=dict(showgrid=False))
+        fig.update_layout(title_text="Total sales "+segmentation_details, title_x=0, xaxis=dict(showgrid=False), yaxis=dict(showgrid=False))
         fig.update_layout(legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -129,6 +129,7 @@ with container2:
             x=0.8
         ))
         fig.update_xaxes(title=xaxes_title)
+        fig['layout']['title']['font'] = dict(size=20)
         st.plotly_chart(fig)
 
         fig2 = go.Figure()
@@ -136,22 +137,16 @@ with container2:
         fig2.add_trace(go.Scatter(x=data2_revenue['total Order Item'], y=data2_revenue['sum'], name=data2_name))
         fig2.update_layout(width=600, height=200, margin=dict(l=0, r=0, b=0, t=30), xaxis=dict(showgrid=False), yaxis=dict(showgrid=False), plot_bgcolor='rgba(255,255,255,0.01)')
         fig2.update_traces(mode='lines+markers', selector=dict(type='scatter'))
-        fig2.update_layout(title_text="Total revenue "+segmentation_details, title_x=0.5, xaxis=dict(showgrid=False), yaxis=dict(showgrid=False))
+        fig2.update_layout(title_text="Total revenue "+segmentation_details, title_x=0, xaxis=dict(showgrid=False), yaxis=dict(showgrid=False))
         fig2.update_layout(legend=dict(
             orientation="h",
-            yanchor="bottom",
-            y=-.3,
-            xanchor="center",
-            x=0.2
-        ))
-        fig2.update_layout(legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1,
+            yanchor="top",
+            y=1.2,
             xanchor="center",
             x=0.8
-        ))
+            ))
         fig2.update_xaxes(title=xaxes_title)
+        fig2['layout']['title']['font'] = dict(size=20)
         st.plotly_chart(fig2)
 
         fig3 = go.Figure()
@@ -159,15 +154,16 @@ with container2:
         fig3.add_trace(go.Bar(x=data2_profit['keuntungan Order Per Order'], y=data2_profit['sum'], name=data2_name, width=0.2))
         fig3.update_layout(width=600, height=200, margin=dict(l=0, r=0, b=0, t=30), xaxis=dict(showgrid=False), yaxis=dict(showgrid=False), plot_bgcolor='rgba(255,255,255,0.01)')
         fig3.update_traces(mode='lines+markers', selector=dict(type='scatter'))
-        fig3.update_layout(title_text="Total profit "+segmentation_details, title_x=0.5, xaxis=dict(showgrid=False), yaxis=dict(showgrid=False), bargroupgap=0, bargap=0.45)
+        fig3.update_layout(title_text="Total profit "+segmentation_details, title_x=0, xaxis=dict(showgrid=False), yaxis=dict(showgrid=False), bargroupgap=0, bargap=0.45)
         fig3.update_layout(legend=dict(
             orientation="h",
             yanchor="bottom",
             y=1,
             xanchor="center",
             x=0.8
-        ))
+            ))
         fig3.update_xaxes(title=xaxes_title)
+        fig3['layout']['title']['font'] = dict(size=20)
         st.plotly_chart(fig3)
         
     with col2:
@@ -195,60 +191,50 @@ with container2:
                 categories_sales1[x] = 0
             if x not in categories_sales2.keys():
                 categories_sales2[x] = 0
-        
-        categories_differences = []
 
-        for i, j in enumerate(categories_sales1):
-            if categories_sales1[j] != 0:
-                categories_differences.append("{:.2f} %".format((categories_sales1[j] - categories_sales2[j])/categories_sales1[j]*100))
-            else:
-                categories_differences.append("")
-        
-        middle_text = ""
+        both_categories = pd.DataFrame({'data1':pd.Series(categories_sales1),'data2':pd.Series(categories_sales2)})
+        both_categories['differences'] = (both_categories['data1'] - both_categories['data2'])/both_categories['data1']
 
-        for i in categories_differences:
-            middle_text += i +"<br><br>"
-        
-        categories_both = pd.DataFrame({'label1':pd.Series(categories_sales1.keys()), 'value1':pd.Series(categories_sales1.values()),
-                                        'label2':pd.Series(categories_sales2.keys()), 'value2':pd.Series(categories_sales2.values()),
-                                        })
-        fig4 = px.bar(pd.wide_to_long(categories_both.loc[::-1].reset_index(drop=True).reset_index(), 
-            stubnames=["label", "value"], i="index", j="group").reset_index().drop(columns="index").assign(group=lambda d: d["group"].astype(str)),
-            y="label",
-            x="value",
-            facet_col="group",
-            facet_col_spacing=0.2,
-            color="group",
-            color_discrete_sequence=["#4472c4", "#ed7d31"],
-        )
+        fig4 = make_subplots(rows=1, cols=2, specs=[[{}, {}]], shared_xaxes=False,
+                    shared_yaxes=True, vertical_spacing=0, horizontal_spacing = 0)
 
+        fig4.append_trace(go.Bar(
+            x=list(categories_sales1.values()),
+            y=list(categories_sales1.keys()),
+            orientation='h',
+            name=data1_name
+        ), 1, 1)
+
+        fig4.append_trace(go.Bar(
+            x=list(categories_sales2.values()), 
+            y=list(categories_sales2.keys()),
+            orientation='h',
+            name=data2_name
+        ), 1, 2)
+        if option == 'year':
+            fig4.update_layout(
+                xaxis_range=[25000,0],
+                xaxis2_range=[0,25000]
+            )
+        else:
+            fig4.update_layout(
+                xaxis_range=[2100,0],
+                xaxis2_range=[0,2100]
+            )
         fig4.update_layout(
-            yaxis2={"side": "right", "matches": None, "showticklabels": False},
-            # yaxis={"showticklabels": False},
-            xaxis={"autorange": "reversed"},
-            xaxis2={"matches": None},
-            # showlegend=False,
+            yaxis={"autorange": "reversed"}
         )
-        fig4.update_layout(width=600, height=450, margin=dict(l=0, r=0, b=0, t=30), xaxis=dict(showgrid=False), yaxis=dict(showgrid=False), plot_bgcolor='rgba(255,255,255,0.01)')
-        fig4.update_layout(xaxis2=dict(showgrid=False), yaxis2=dict(showgrid=False))
-        fig4.for_each_annotation(lambda a: a.update(text=""))
-        # fig4.update_traces(texttemplate="%{y}", textposition="auto")
-        fig4.update_yaxes(title='')
-        fig4.add_annotation(text=middle_text, 
-                    align='center',
-                    showarrow=False,
-                    xref='paper',
-                    yref='paper',
-                    x=0.5,
-                    y=0.98,
-                    width=120,
-                    height=450,
-                    valign="top",
-                    exclude_empty_subplots=False,
-                    font=dict(
-                                size=13
-                            )
-        )
+        fig4.update_layout(title_text="Categories sales count comparison", title_x=0)
+        fig4.update_layout(width=600, height=400, margin=dict(l=0, r=0, b=0, t=50), xaxis=dict(showgrid=False), xaxis2=dict(showgrid=False), plot_bgcolor='rgba(255,255,255,0.01)')
+        fig4.update_traces(texttemplate="%{x}", textposition="auto")
+        fig4.update_layout(legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1,
+            xanchor="center",
+            x=0.8
+            ))
+        fig4['layout']['title']['font'] = dict(size=20)
         st.plotly_chart(fig4)
 
     with col3:
