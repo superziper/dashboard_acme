@@ -44,6 +44,12 @@ with container2:
         fig.update_layout(title_text="Customer type", title_x=0.5)
         fig['layout']['title']['font'] = dict(size=20)
         fig.update_layout(showlegend=False)
+        fig.add_layout_image(
+            dict(
+                source="https://img.icons8.com/color/344/administrator-male-skin-type-3.png",
+                xref="paper", yref="paper",
+                x=0, y=0
+            ))
         st.plotly_chart(fig) 
 
     with col2:
