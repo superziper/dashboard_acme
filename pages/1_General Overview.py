@@ -42,13 +42,6 @@ with container2:
         df_year = df
     else:
         df_year = df[(df[' tanggal order (DateOrders)'] >= str(option)+'-01-01') & (df[' tanggal order (DateOrders)'] < str(option+1)+'-01-01')]
-    # @st.cache(allow_output_mutation=True)
-    # def get_country_sales_total():
-    #     countries_sales = df_year['Negara order'].value_counts().reset_index()
-    #     countries_sales['index'] = countries_sales['index'].apply(lambda x : translator.translate(x).text)
-    #     return countries_sales
-
-    # countries = get_country_sales_total()
 
     total_sales = len(df_year)
 
@@ -73,20 +66,20 @@ with container2:
         st.markdown('#')
         st.markdown('#')
         if option == 'Total':   
-            total_sales_revenue = int(df_year['penjualan'].groupby(df_year[' tanggal order (DateOrders)'].dt.year).sum().sum())
+            total_sales_revenue = int(df_year['total Order Item'].groupby(df_year[' tanggal order (DateOrders)'].dt.year).sum().sum())
             st.write("Total sales revenue")
             st.header("${:,.0f}".format(total_sales_revenue))
         else:
-            total_sales_revenue = int(df_year['penjualan'].groupby(df_year[' tanggal order (DateOrders)'].dt.month).sum().sum())
+            total_sales_revenue = int(df_year['total Order Item'].groupby(df_year[' tanggal order (DateOrders)'].dt.month).sum().sum())
             st.write("Total sales revenue")
             st.header("${:,.0f}".format(total_sales_revenue))
         st.markdown("#")
         if option == 'Total':
-            sales_revenue = int(df_year['penjualan'].groupby(df_year[' tanggal order (DateOrders)'].dt.year).sum().mean())
+            sales_revenue = int(df_year['total Order Item'].groupby(df_year[' tanggal order (DateOrders)'].dt.year).sum().mean())
             st.write("Yearly sales revenue")
             st.header("${:,.0f}".format(sales_revenue))
         else:
-            sales_revenue = int(df_year['penjualan'].groupby(df_year[' tanggal order (DateOrders)'].dt.month).sum().mean()) 
+            sales_revenue = int(df_year['total Order Item'].groupby(df_year[' tanggal order (DateOrders)'].dt.month).sum().mean()) 
             st.write("Monthly sales revenue")
             st.header("${:,.0f}".format(sales_revenue))
 
@@ -122,14 +115,26 @@ with container3:
         fig2.update_layout(title_text="TOTAL SALES PER REGION", title_x=0.5)
         fig2.update_traces(texttemplate='%{text:.2f} %',textposition='auto')
         fig2['layout']['title']['font'] = dict(size=20)
+        fig2.update_layout(margin={"r":70,"t":50,"l":20,"b":50})
         st.plotly_chart(fig2)  
 
     with col2:
-        st.write("NANTI YAAA")
         countries = df_year['Negara order'].value_counts()
-        fig2 = px.choropleth(countries, locations=countries.index, color=countries.values, locationmode='country names')
-        fig2.update_layout(margin={"r":50,"t":50,"l":50,"b":50})
-        st.plotly_chart(fig2) 
+        fig2 = px.choropleth(countries, locations=countries.index, color=countries.values, locationmode='country names', color_continuous_scale='rainbow', width=700, height=400)
+        fig2.update_layout(margin={"r":50,"t":30,"l":30,"b":50})
+        fig2.update_layout(title_text="TOTAL SALES PER COUNTRY", title_x=0.45)
+        fig2.update_layout(coloraxis_colorbar=dict(
+            title='Total Sales',
+            len=0.8,
+            xanchor="right", x=1.2,
+            yanchor='middle', y=0.5,
+            thickness=20,
+        ))
+        hexcode = 0
+        borders=[hexcode for x in range(len(df_year))]
+        fig2.update_traces(marker_line_width=borders)
+        fig2.update_layout(geo=dict(bgcolor= 'rgba(0,0,0,0)'))
+        st.plotly_chart(fig2)  
 
 with container4:
     col1, col2, col3, col4 = st.columns([3.2, 1.5, 1, 1])
